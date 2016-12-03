@@ -84,3 +84,29 @@ int bbin(nodo_t *nodoAtual, Hash numero);
 
 //Com o usuário
 void imprimeMenu();
+
+
+void insereArquivo(char *nomeDoArquivo);
+/*
+    Se a árvore esta vazia vai chamar a função leituraArquivo();
+    Se Não vai carregar o arquivo um memória e chamar a função CarregaIndices().
+    Após carregar os nodos para cada item do index vai ser chamada a função insere()
+    passando um nodo e inserindo na árvore;
+*/
+
+void insereLinha(char *linha);
+/*
+    Recebe uma linha a ser inserida, como não tem o offset para referenciar no nodo,
+    vai salvar em arquivo esta string e em seguida chamar  a função insereArquivo()
+    passando o nome do arquivo para ser carregado e inserido.
+*/
+
+void *carregaIndices(vind &indices, FILE *arquivo);
+/*
+    Vai receber o arquivo que já está em memória e carregar os nodos para a estrutura do tipo vind.
+*/
+
+void insere(nodo_t* Arvore, nodo_t* noAtual);
+/*
+    Recebe a árvore e o nodo a ser inserido, dentro vai inserir na árvore e tratar todas as exceções.
+*/

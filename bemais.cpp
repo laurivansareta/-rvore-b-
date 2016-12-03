@@ -66,7 +66,7 @@ nodo_t* trataExcecoes(nodo_t* paiAtual, nodo_t *filhoAtual, int ordem) {
   if (filhoAtual && filhoAtual->quantidadeKeys < (ordem-1)/2) {
     nodo_t *familiarBeneficiario = NULL;
     int i, j;
-    
+
     //acha o parente que vai receber as keys e os offsets
     if (paiAtual->quantidadeFilhos > 1) familiarBeneficiario = paiAtual->filhos[paiAtual->quantidadeFilhos-2];
     else { //else: pega do primo
@@ -93,11 +93,11 @@ int bulk_loading(nodo_t* &arvore, vind &indices, int ordem){
   nodo_t *filhoAtual = NULL, *paiAtual = NULL;
   offsets_t *novo;
   int iteradorIndices = 0, first = 1, condicaoParaFor = (ordem-1)/2;
-  
+
   //cria o primeiro pai
   paiAtual = criaNodo(ordem, false);
   if (!paiAtual) { printf("Erro criando o primeiro pai\n"); return 1; }
-  
+
   while (iteradorIndices < (int)indices.size()) {
     filhoAtual = criaNodo(ordem, true);
 
@@ -110,14 +110,14 @@ int bulk_loading(nodo_t* &arvore, vind &indices, int ordem){
 	filhoAtual->keys[j] = indices[iteradorIndices].hash;
 	filhoAtual->quantidadeKeys++;
       }
-        
+
       //cria novo offset, passando como parametro o offset da hash atual e ligando o novo offset no começo da lista
       novo = NULL;
       novo = criaOffset(indices[iteradorIndices].offset, filhoAtual->offsets[j]);
       if (!novo) { printf("Erro ao criar offset %lld", indices[iteradorIndices].offset); return 1; }
       filhoAtual->offsets[j] = novo;
     }
-      
+
     if (first) { //primeiro caso/folha
       first = 0;
       paiAtual->filhos[0] = filhoAtual;
@@ -128,7 +128,7 @@ int bulk_loading(nodo_t* &arvore, vind &indices, int ordem){
   }
 
   filhoAtual = trataExcecoes(paiAtual, filhoAtual, ordem);
-  
+
   //atualiza a raiz
   while (filhoAtual->pai != NULL) filhoAtual = filhoAtual->pai;
   arvore = filhoAtual;
@@ -139,14 +139,14 @@ int checaPai(nodo_t *filhoAtual, nodo_t** pAtual, Hash hashQueVem, int ordem) { 
   nodo_t *tioAtual = NULL, *voAtual = (*pAtual)->pai, *paiAtual = *pAtual;
   Hash hashQueSobe;
   int i, j;
-  
+
   if (paiAtual->quantidadeFilhos >= ordem) {
     tioAtual = criaNodo(ordem, false);
     if (!tioAtual) return 1; //retorna erro se nao criou
-    
+
     //pega hash que sobe
     hashQueSobe = paiAtual->keys[(ordem-1)/2];
-    
+
     //divide paiAtual com tioAtual
     for (i = (ordem + 1) / 2, j = 0; i < ordem - 1; i++, j++) {
       tioAtual->keys[j] = paiAtual->keys[i];
@@ -160,7 +160,7 @@ int checaPai(nodo_t *filhoAtual, nodo_t** pAtual, Hash hashQueVem, int ordem) { 
     tioAtual->quantidadeFilhos = tioAtual->quantidadeKeys + 1;
     paiAtual->quantidadeKeys = (ordem-1)/2;
     paiAtual->quantidadeFilhos = (ordem+1)/2;
-    
+
     if (!paiAtual->pai) {
       voAtual = criaNodo(ordem, false);
       paiAtual->pai = voAtual;
@@ -181,10 +181,10 @@ int checaPai(nodo_t *filhoAtual, nodo_t** pAtual, Hash hashQueVem, int ordem) { 
 
 nodo_t* criaNodo(int ordem, bool folha){
   nodo_t *nodo = NULL;
-  
+
   nodo = (nodo_t*)malloc(sizeof(nodo_t));
   if (!nodo) { printf("Erro na criaNodo\n"); return NULL; }
-  
+
   if(!folha) {
     nodo->filhos = NULL;
     nodo->filhos = (nodo_t**)malloc( sizeof(nodo_t*) * ordem );
@@ -221,7 +221,7 @@ void mataArvore(nodo_t *n) {
   for (int i = 0; n->folha && i < n->quantidadeKeys; i++) {
     if (n->offsets[i]) mataOffsets(n->offsets[i]->prox);
   }
-  
+
   for (int i = 0; !n->folha && i < n->quantidadeFilhos; i++) {
     mataArvore(n->filhos[i]);
   }
@@ -241,7 +241,7 @@ int imprimeArvore(nodo_t *arvore) {
   FILE *dotFile = NULL;
   char nomeArquivo[] = "saida.dot", comando[400];
   int numeroNodo = 0;
-  
+
   //cria o comando
   sprintf(comando, "dot %s -Tpng -o saida.png && kde-open saida.png\n", nomeArquivo);
 
@@ -253,7 +253,7 @@ int imprimeArvore(nodo_t *arvore) {
   fprintf(dotFile, "}\n");
   fclose(dotFile);
   system(comando);
-  return 0; 
+  return 0;
 }
 
 void imprimeNodos(FILE *dotFile, nodo_t *n, int *numeroNodo, int liga) {
@@ -265,7 +265,7 @@ void imprimeNodos(FILE *dotFile, nodo_t *n, int *numeroNodo, int liga) {
     (*numeroNodo)++;
     imprimeNodos(dotFile, n->filhos[i], numeroNodo, i);
   }
-  
+
   //imprime esse nodo
   fprintf(dotFile, "%d [label=\"", esseNumero);
   for (int i = 0; i < n->quantidadeKeys; i++)
@@ -288,11 +288,11 @@ void removeUltimo(nodo_t *paiAtual, int ordem) {
   int i, j;
   voAtual = paiAtual->pai;
   tioAtual = voAtual->filhos[--voAtual->quantidadeFilhos - 1];
-  
+
   //abaixa uma hash pro tio
   tioAtual->keys[tioAtual->quantidadeKeys++] = voAtual->keys[--voAtual->quantidadeKeys];
   printf("%d]", tioAtual->quantidadeKeys);
-  
+
   for (i = tioAtual->quantidadeKeys, j = 0; j < paiAtual->quantidadeKeys; j++, i++) {
     paiAtual->filhos[j]->pai = tioAtual;
     tioAtual->keys[i] = paiAtual->keys[j];
@@ -303,11 +303,11 @@ void removeUltimo(nodo_t *paiAtual, int ordem) {
   tioAtual->filhos[i] = paiAtual->filhos[j];
   paiAtual->filhos[j]->pai = tioAtual;
   tioAtual->quantidadeFilhos++;
-  
+
   paiAtual->quantidadeFilhos = paiAtual->quantidadeKeys = 0;
   mataArvore(paiAtual);
   removeUltimo(voAtual, ordem);
-      
+
 }
 
 int bbin(nodo_t *nodoAtual, Hash numero) {
@@ -344,6 +344,8 @@ void imprimeMenu() {
   printf("0• Sair\n");
   printf("1• Imprimir a árvore\n");
   printf("2• Buscar\n");
+  printf("3• Inserção por arquivo\n");
+  printf("4• Inserção via terminal\n");
 }
 
 #endif

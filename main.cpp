@@ -4,27 +4,27 @@
 
 int main(int argc, char *argv[]) {
   int nChar, atributo, ordem, opMenu = 1, indiceBusca;
-  char nomeArquivo[200], busca[MAXLINHA];
+  char nomeArquivo[200], busca[MAXLINHA], insercao[MAXLINHA];
   FILE *entrada = NULL;
   vind indices;
   nodo_t *arvore = NULL, *nodoDeBusca;
-  
+
   //pega a quantidade de caracteres que farao parte do indice, a ordem da arvore, o atributo que sera levado em conta e o nome do arquivo
   atributo = atoi(argv[1]);
-  nChar = atoi(argv[2]); 
+  nChar = atoi(argv[2]);
   ordem = atoi(argv[3]);
   strcpy(nomeArquivo,argv[4]);
-  
+
   //abre o arquivo de entrada
   entrada = abrirArquivo(nomeArquivo); //passa o nome do arquivo
   if (!entrada) return 0;
-  
+
   //le as entrada o coloca os offsets das tuplas no vetor de indices
   leituraArquivo(indices, nChar, atributo, entrada);
-    
+
   //realiza o bulkload que retornara 0 no sucesso
   if (bulk_loading(arvore, indices, ordem)) return 0;
-    
+
   for (int i = 0; i < (int)indices.size(); i++)
     printf("%d: %llu\n", i, indices[i].hash);
 
@@ -53,11 +53,25 @@ int main(int argc, char *argv[]) {
 	putchar('\n');
       }
       break;
+    case 3:
+        printf("Digite nome do arquivo a ser inserido.\n");
+        fgets(insercao, MAXLINHA, stdin);
+        insercao[strlen(insercao)-1] = '\0';
+        insercao[nChar] = '\0';
+        insereArquivo(&insercao);
+        break;
+    case 4:
+        printf("Digite o texto a ser Inserido\n");
+        fgets(insercao, MAXLINHA, stdin);
+        insercao[strlen(insercao)-1] = '\0';
+        insercao[nChar] = '\0';
+        insere(arvore, insercao);
+        break;
     default:
       printf("Opção inválida\n");
       break;
-    } 
-  }  
+    }
+  }
   mataArvore(arvore);
   fclose(entrada);
   return 0;
