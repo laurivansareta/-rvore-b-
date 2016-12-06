@@ -101,7 +101,7 @@ void insereLinha(char *linha);
     passando o nome do arquivo para ser carregado e inserido.
 */
 
-void *carregaIndices(vind &indices, FILE *arquivo);
+void carregaIndices(vind &indices, FILE *arquivo);
 /*
     Vai receber o arquivo que já está em memória e carregar os nodos para a estrutura do tipo vind.
 */
