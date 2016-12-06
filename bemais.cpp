@@ -339,6 +339,10 @@ void imprimeTupla(nodo_t *nodoAtual, int indiceElemento, FILE *arquivo) {
   }
 }
 
+void insere(nodo_t *arvore, nodo_t *noAtual){
+
+}
+
 void imprimeMenu() {
   printf("Digite a opção desejada\n");
   printf("0• Sair\n");

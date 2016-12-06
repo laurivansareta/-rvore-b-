@@ -58,14 +58,14 @@ int main(int argc, char *argv[]) {
         fgets(insercao, MAXLINHA, stdin);
         insercao[strlen(insercao)-1] = '\0';
         insercao[nChar] = '\0';
-        insereArquivo(&insercao);
+        //insereArquivo(arvore, insercao);
         break;
     case 4:
         printf("Digite o texto a ser Inserido\n");
         fgets(insercao, MAXLINHA, stdin);
         insercao[strlen(insercao)-1] = '\0';
         insercao[nChar] = '\0';
-        insere(arvore, insercao);
+        //insereLinha(arvore, insercao);
         break;
     default:
       printf("Opção inválida\n");
