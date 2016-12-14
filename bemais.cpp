@@ -3,10 +3,17 @@
 #include "bemais.h"
 using namespace std;
 
+
 /*
 keys minimas = (ordem-1)/2
 filhos minimos = (ordem+1)/2
  */
+
+int _nChar = 0;
+int _atributo = 0;
+int _ordem = 0;
+FILE **_arquivos;
+
 
 Hash hashFunction(char *str) { //funcao hash djb2
   Hash hash = 5381;
@@ -15,19 +22,19 @@ Hash hashFunction(char *str) { //funcao hash djb2
   return hash;
 }
 
-void leituraArquivo(vind &indices, int nChar, int atributo, FILE *entrada){
+void leituraArquivo(vind &indices, FILE *entrada){
   int tamanho, i, j, virgula;
-  char linha[MAXLINHA], aux[nChar+1];
+  char linha[MAXLINHA], aux[_nChar+1];
   Hash hash = 0;
   Offset offsetAux;
 
   while (offsetAux = ftell(entrada), fgets(linha, MAXLINHA, entrada)) {
-    virgula = atributo - 1;
+    virgula = _atributo - 1;
     linha[strlen(linha)-1] = '\0';
     //passa o atributo pro aux
     for (i = 0, tamanho = strlen(linha); i < tamanho && virgula; i++)
       if (linha[i] == ',') virgula--;
-    for (j = 0; j < nChar && linha[i] != '\0' && linha[i] != '\n' && linha[i] != ','; i++)
+    for (j = 0; j < _nChar && linha[i] != '\0' && linha[i] != '\n' && linha[i] != ','; i++)
       if (linha[i] != '"') aux[j++] = linha[i];
     aux[j] = '\0';
 
@@ -107,8 +114,8 @@ int bulk_loading(nodo_t* &arvore, vind &indices, int ordem){
       if (j && filhoAtual->keys[j-1] == indices[iteradorIndices].hash) { j--; }
       else if (j == condicaoParaFor && indices[iteradorIndices].hash != filhoAtual->keys[j-1]) { break; }
       else {
-	filhoAtual->keys[j] = indices[iteradorIndices].hash;
-	filhoAtual->quantidadeKeys++;
+        filhoAtual->keys[j] = indices[iteradorIndices].hash;
+        filhoAtual->quantidadeKeys++;
       }
 
       //cria novo offset, passando como parametro o offset da hash atual e ligando o novo offset no começo da lista
@@ -327,9 +334,10 @@ nodo_t *achaElemento(nodo_t* noAtual, int &indice, Hash procurando) {
   return NULL;
 }
 
-void imprimeTupla(nodo_t *nodoAtual, int indiceElemento, FILE *arquivo) {
+void imprimeTupla(nodo_t *nodoAtual, int indiceElemento) {
   offsets_t *o;
   char tupla[MAXLINHA];
+  FILE *arquivo = _arquivos[nodoAtual->offsets[indiceElemento]->indexArquivo];
   if (!nodoAtual || !arquivo || indiceElemento < 0) return;
   for (o = nodoAtual->offsets[indiceElemento]; o; o = o->prox) {
     fseek(arquivo, o->offset, SEEK_SET);
@@ -339,8 +347,54 @@ void imprimeTupla(nodo_t *nodoAtual, int indiceElemento, FILE *arquivo) {
   }
 }
 
-void insere(nodo_t *arvore, nodo_t *noAtual){
+int addArquivo(FILE *arquivo){
+  int i;
 
+  if (_arquivos == NULL){
+    _arquivos = (FILE **)malloc(1000*sizeof(FILE));
+  }
+  for(i=0; i<MAXARQUIVOS; i++){
+    if (_arquivos[i] == NULL) break;
+  }
+  if (i==MAXARQUIVOS) {
+    printf("Erro ao salvar arquivo em memória, tem mais arquivos do que a estrutura suporta\n");
+    return -1;
+  }
+  _arquivos[i] = arquivo;
+  return i;
+}
+
+void insere(nodo_t* &arvore, nodo_t *noAtual){
+
+}
+
+void insereLinha(nodo_t* &arvore, char *linha){
+
+}
+
+void insereArquivo(nodo_t* &arvore, char *nomeDoArquivo){
+  vind indices;
+  int indiceArquivo = addArquivo(abrirArquivo(nomeDoArquivo));
+
+  if (indiceArquivo == -1) return;
+
+  //lê as entradas o coloca os offsets das tuplas no vetor de índices
+  leituraArquivo(indices, _arquivos[indiceArquivo]);
+
+  if (arvore == NULL){
+    //realiza o bulkload que retornara 0 no sucesso
+    if (bulk_loading(arvore, indices, _ordem)) return;
+  }else{
+    //Chamar função insere para cada item;
+  }
+  for (int i = 0; i < (int)indices.size(); i++)
+    printf("%d: %llu\n", i, indices[i].hash);
+}
+
+void setAtributos(int nChar, int atributo, int ordem){
+  _nChar = nChar;
+  _atributo = atributo;
+  _ordem = ordem;
 }
 
 void imprimeMenu() {

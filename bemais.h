@@ -5,6 +5,7 @@
 #include <algorithm>
 
 #define MAXLINHA 1123
+#define MAXARQUIVOS 1000
 
 using namespace std;
 
@@ -21,6 +22,7 @@ typedef struct index_t{
 
 //offsets. O prox e pra quando se tem mais de um hash igual
 typedef struct offsets_t{    //lista encadeada dos offsets
+    int indexArquivo;
     Offset offset;
     struct offsets_t *prox;
 } offsets_t;
@@ -48,7 +50,7 @@ FILE* abrirArquivo(char arquivoEntrada[]);
 //Função para comparar duas variáves de tipo index_t. Foi criada pra dar suporte a função de sort da biblioteca algorithm.
 bool compareIndex(const index_t &_a, const index_t &_b);
 //Função que le o arquivo .csv e guarda as hashs e os offsets no vector de index_t
-void leituraArquivo(vind &indices, int nChar, int atributo, FILE *entrada);
+void leituraArquivo(vind &indices, FILE *entrada);
 
 //BulkLoading
 //Função principal do Bulk Loading. Retorna se nenhum erro aconteceu.
@@ -74,7 +76,7 @@ void imprimeNodos(FILE *dotFile, nodo_t *n, int *numeroNodo, int liga);
 //Função que remove o Ultimo elemento de um nó e ajeita o nó de acordo com o resultado.
 void removeUltimo(nodo_t *paiAtual, int ordem);
 //Função que imprime a tupla, dado um no e uma posição
-void imprimeTupla(nodo_t *nodoAtual, int indiceElemento, FILE *arquivo);
+void imprimeTupla(nodo_t *nodoAtual, int indiceElemento);
 
 //Buscar Elemento
 //Função que retorna o endereço do nó em que se encontra o elemento "procurando" e coloca a posição do elemento na variável indice. A função retorna NULL caso o elemento não seja encontrado
@@ -85,8 +87,11 @@ int bbin(nodo_t *nodoAtual, Hash numero);
 //Com o usuário
 void imprimeMenu();
 
+void setAtributos(int nChar, int atributo, int ordem);
 
-void insereArquivo(nodo_t *arvore, char *nomeDoArquivo);
+int addArquivo(FILE *arquivo);
+
+void insereArquivo(nodo_t* &arvore, char *nomeDoArquivo);
 /*
     Se a árvore esta vazia vai chamar a função leituraArquivo();
     Se Não vai carregar o arquivo um memória e chamar a função CarregaIndices().
@@ -94,7 +99,7 @@ void insereArquivo(nodo_t *arvore, char *nomeDoArquivo);
     passando um nodo e inserindo na árvore;
 */
 
-void insereLinha(nodo_t *arvore, char *linha);
+void insereLinha(nodo_t* &arvore, char *linha);
 /*
     Recebe a árvore e uma linha a ser inserida, como não tem o offset para referenciar no nodo,
     vai salvar em arquivo esta string e em seguida chamar  a função insereArquivo()
@@ -106,7 +111,8 @@ void carregaIndices(vind &indices, FILE *arquivo);
     Vai receber o arquivo que já está em memória e carregar os nodos para a estrutura do tipo vind.
 */
 
-void insere(nodo_t *arvore, nodo_t *noAtual);
+void insere(nodo_t* &arvore, nodo_t *noAtual);
 /*
     Recebe a árvore e o nodo a ser inserido, dentro vai inserir na árvore e tratar todas as exceções.
 */
+

@@ -5,8 +5,6 @@
 int main(int argc, char *argv[]) {
   int nChar, atributo, ordem, opMenu = 1, indiceBusca;
   char nomeArquivo[200], busca[MAXLINHA], insercao[MAXLINHA];
-  FILE *entrada = NULL;
-  vind indices;
   nodo_t *arvore = NULL, *nodoDeBusca;
 
   //pega a quantidade de caracteres que farao parte do indice, a ordem da arvore, o atributo que sera levado em conta e o nome do arquivo
@@ -15,18 +13,12 @@ int main(int argc, char *argv[]) {
   ordem = atoi(argv[3]);
   strcpy(nomeArquivo,argv[4]);
 
-  //abre o arquivo de entrada
-  entrada = abrirArquivo(nomeArquivo); //passa o nome do arquivo
-  if (!entrada) return 0;
+  setAtributos(nChar, atributo, ordem);
 
-  //le as entrada o coloca os offsets das tuplas no vetor de indices
-  leituraArquivo(indices, nChar, atributo, entrada);
-
-  //realiza o bulkload que retornara 0 no sucesso
-  if (bulk_loading(arvore, indices, ordem)) return 0;
-
-  for (int i = 0; i < (int)indices.size(); i++)
-    printf("%d: %llu\n", i, indices[i].hash);
+  if(strlen(nomeArquivo) >= 0) {
+    //Carrega e insere o arquivo informado inicialmente;
+    insereArquivo(arvore, nomeArquivo);
+  }
 
   while (opMenu) {
     imprimeMenu();
@@ -48,9 +40,9 @@ int main(int argc, char *argv[]) {
       nodoDeBusca = achaElemento(arvore, indiceBusca, hashFunction(busca));
       if (!nodoDeBusca) printf("Linha não encontrada\n");
       else {
-	printf("\nResultados encontrados:\n");
-	imprimeTupla(nodoDeBusca, indiceBusca, entrada);
-	putchar('\n');
+        printf("\nResultados encontrados:\n");
+        imprimeTupla(nodoDeBusca, indiceBusca);
+        putchar('\n');
       }
       break;
     case 3:
@@ -58,14 +50,14 @@ int main(int argc, char *argv[]) {
         fgets(insercao, MAXLINHA, stdin);
         insercao[strlen(insercao)-1] = '\0';
         insercao[nChar] = '\0';
-        //insereArquivo(arvore, insercao);
+        insereArquivo(arvore, insercao);
         break;
     case 4:
         printf("Digite o texto a ser Inserido\n");
         fgets(insercao, MAXLINHA, stdin);
         insercao[strlen(insercao)-1] = '\0';
         insercao[nChar] = '\0';
-        //insereLinha(arvore, insercao);
+        insereLinha(arvore, insercao);
         break;
     default:
       printf("Opção inválida\n");
@@ -73,6 +65,6 @@ int main(int argc, char *argv[]) {
     }
   }
   mataArvore(arvore);
-  fclose(entrada);
+  //Criar função para fechar todos os arquivos.
   return 0;
 }
