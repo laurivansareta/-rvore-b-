@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) {
 
   setAtributos(nChar, atributo, ordem);
 
-  if(strlen(nomeArquivo) >= 0) {
+  if(strlen(nomeArquivo) > 0) {
     //Carrega e insere o arquivo informado inicialmente;
     insereArquivo(arvore, nomeArquivo);
   }
@@ -49,14 +49,14 @@ int main(int argc, char *argv[]) {
         printf("Digite nome do arquivo a ser inserido.\n");
         fgets(insercao, MAXLINHA, stdin);
         insercao[strlen(insercao)-1] = '\0';
-        insercao[nChar] = '\0';
+        insercao[MAXLINHA] = '\0';
         insereArquivo(arvore, insercao);
         break;
     case 4:
         printf("Digite o texto a ser Inserido\n");
         fgets(insercao, MAXLINHA, stdin);
         insercao[strlen(insercao)-1] = '\0';
-        insercao[nChar] = '\0';
+        insercao[MAXLINHA] = '\0';
         insereLinha(arvore, insercao);
         break;
     default:
@@ -65,6 +65,6 @@ int main(int argc, char *argv[]) {
     }
   }
   mataArvore(arvore);
-  //Criar função para fechar todos os arquivos.
+  fecharArquivos();
   return 0;
 }

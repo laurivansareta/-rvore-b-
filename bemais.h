@@ -116,3 +116,9 @@ void insere(nodo_t* &arvore, nodo_t *noAtual);
     Recebe a árvore e o nodo a ser inserido, dentro vai inserir na árvore e tratar todas as exceções.
 */
 
+void fecharArquivos();
+/*
+  Chama a função fclose para cada arquivo que está na memória.
+*/
+
+

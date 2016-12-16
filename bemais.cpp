@@ -1,6 +1,7 @@
 #ifndef _BEMAIS_
 #define _BEMAIS_
 #include "bemais.h"
+#include<time.h>
 using namespace std;
 
 
@@ -111,9 +112,11 @@ int bulk_loading(nodo_t* &arvore, vind &indices, int ordem){
     //preenche o nodo filhoAtual, que é o filho do paiAtual
     for(int j = 0; j <= condicaoParaFor && iteradorIndices < (int)indices.size(); iteradorIndices++, j++){
       //se o hash a ser inserido for o mesmo que o anterior, ele coloca o offset no mesmo
-      if (j && filhoAtual->keys[j-1] == indices[iteradorIndices].hash) { j--; }
-      else if (j == condicaoParaFor && indices[iteradorIndices].hash != filhoAtual->keys[j-1]) { break; }
-      else {
+      if (j && filhoAtual->keys[j-1] == indices[iteradorIndices].hash) {
+        j--;
+      } else if (j == condicaoParaFor && indices[iteradorIndices].hash != filhoAtual->keys[j-1]) {
+        break;
+      } else {
         filhoAtual->keys[j] = indices[iteradorIndices].hash;
         filhoAtual->quantidadeKeys++;
       }
@@ -130,8 +133,9 @@ int bulk_loading(nodo_t* &arvore, vind &indices, int ordem){
       paiAtual->filhos[0] = filhoAtual;
       filhoAtual->pai = paiAtual;
       paiAtual->quantidadeFilhos = 1;
+    } else if (checaPai(filhoAtual, &paiAtual, filhoAtual->keys[0], ordem)) {
+      return 1;
     }
-    else if (checaPai(filhoAtual, &paiAtual, filhoAtual->keys[0], ordem)) { return 1; }
   }
 
   filhoAtual = trataExcecoes(paiAtual, filhoAtual, ordem);
@@ -197,8 +201,7 @@ nodo_t* criaNodo(int ordem, bool folha){
     nodo->filhos = (nodo_t**)malloc( sizeof(nodo_t*) * ordem );
     if (!nodo->filhos) { printf("Erro inicializando vetor dos filhos\n"); return NULL; }
     nodo->offsets = NULL;
-  }
-  else {
+  } else {
     nodo->offsets = NULL;
     nodo->offsets = (offsets_t**)malloc(sizeof(offsets_t*)*(ordem-1));
     if (!nodo->offsets) { printf("Erro inicializando vetor de offsets\n"); return NULL; }
@@ -368,8 +371,26 @@ void insere(nodo_t* &arvore, nodo_t *noAtual){
 
 }
 
-void insereLinha(nodo_t* &arvore, char *linha){
+char *criaArquivo(char *texto){
+  char *nomeArquivo;
+  FILE *arq;
+  time_t t;
+  time(&t);
 
+  nomeArquivo = ctime(&t);
+
+  //abrindo o arquivo
+  arq = fopen(nomeArquivo, "a");
+  fprintf(arq, texto);
+  fputc('\n', arq);
+  fclose(arq);
+
+  printf("\nO arquivo \%s foi  criado com sucesso!", nomeArquivo);
+  return nomeArquivo;
+}
+
+void insereLinha(nodo_t* &arvore, char *linha){
+  insereArquivo(arvore, criaArquivo(linha));
 }
 
 void insereArquivo(nodo_t* &arvore, char *nomeDoArquivo){
@@ -395,6 +416,14 @@ void setAtributos(int nChar, int atributo, int ordem){
   _nChar = nChar;
   _atributo = atributo;
   _ordem = ordem;
+}
+
+void fecharArquivos(){
+  if (!_arquivos[0]) return;
+  for(int i=0; i<MAXARQUIVOS; i++){
+    if (_arquivos[i] == NULL) break;
+    fclose(_arquivos[i]);
+  }
 }
 
 void imprimeMenu() {
