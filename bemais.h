@@ -54,13 +54,13 @@ void leituraArquivo(vind &indices, FILE *entrada);
 
 //BulkLoading
 //Função principal do Bulk Loading. Retorna se nenhum erro aconteceu.
-int bulk_loading(nodo_t* &arvore, vind &indices, int ordem);
+int bulk_loading(nodo_t* &arvore, vind &indices, int ordem, int indexArquivo);
 //Função que liga o filho recém criado de Bulk Loading com o pai. Se não tem espaço no pai, a função também lida com isso criando novos nós.
 int checaPai(nodo_t *filhoAtual, nodo_t** pAtual, Hash hashQueVem, int ordem);
 //Função que cria e inicaliza nodo e retorna o ponteiro.
 nodo_t* criaNodo(int ordem, bool folha);
 //Função que cria e inicializa offset e retorna o ponteiro pro offset. Ela recebe o offset a ser inserido e o antigo offset de um hash, para poder inserir o novo offset no começo da lista, e não no final.
-offsets_t* criaOffset(Offset o, offsets_t *p);
+offsets_t* criaOffset(Offset o, offsets_t *p, int indexArquivo);
 
 //Destruir a árvore
 //Função para destruir a arvore (desalocar da memória)
@@ -111,14 +111,16 @@ void carregaIndices(vind &indices, FILE *arquivo);
     Vai receber o arquivo que já está em memória e carregar os nodos para a estrutura do tipo vind.
 */
 
-void insere(nodo_t* &arvore, nodo_t *noAtual);
+void insere(nodo_t* &arvore, index_t info, int indexArquivo);
 /*
-    Recebe a árvore e o nodo a ser inserido, dentro vai inserir na árvore e tratar todas as exceções.
+    Recebe a árvore e a informação do nodo a ser inserido, dentro vai inserir na árvore e tratar todas as exceções.
 */
 
 void fecharArquivos();
 /*
   Chama a função fclose para cada arquivo que está na memória.
 */
+
+nodo_t *achaElementoInsercao(nodo_t* noAtual, int &indice, Hash procurando);
 
 

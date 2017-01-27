@@ -97,7 +97,7 @@ nodo_t* trataExcecoes(nodo_t* paiAtual, nodo_t *filhoAtual, int ordem) {
   return filhoAtual;
 }
 
-int bulk_loading(nodo_t* &arvore, vind &indices, int ordem){
+int bulk_loading(nodo_t* &arvore, vind &indices, int ordem, int indexArquivo){
   nodo_t *filhoAtual = NULL, *paiAtual = NULL;
   offsets_t *novo;
   int iteradorIndices = 0, first = 1, condicaoParaFor = (ordem-1)/2;
@@ -123,7 +123,7 @@ int bulk_loading(nodo_t* &arvore, vind &indices, int ordem){
 
       //cria novo offset, passando como parametro o offset da hash atual e ligando o novo offset no começo da lista
       novo = NULL;
-      novo = criaOffset(indices[iteradorIndices].offset, filhoAtual->offsets[j]);
+      novo = criaOffset(indices[iteradorIndices].offset, filhoAtual->offsets[j], indexArquivo);
       if (!novo) { printf("Erro ao criar offset %lld", indices[iteradorIndices].offset); return 1; }
       filhoAtual->offsets[j] = novo;
     }
@@ -218,10 +218,11 @@ nodo_t* criaNodo(int ordem, bool folha){
 
 }
 
-offsets_t* criaOffset(Offset o, offsets_t *p) {
+offsets_t* criaOffset(Offset o, offsets_t *p, int indexArquivo) {
   offsets_t *r = NULL;
   r = (offsets_t*)malloc(sizeof(offsets_t));
   r->offset = o;
+  r->indexArquivo = indexArquivo;
   r->prox = p;
   return r;
 }
@@ -332,7 +333,10 @@ int bbin(nodo_t *nodoAtual, Hash numero) {
 
 nodo_t *achaElemento(nodo_t* noAtual, int &indice, Hash procurando) {
   int ind = bbin(noAtual, procurando);
-  if (noAtual->keys[ind] == procurando && noAtual->folha) { indice = ind; return noAtual; }
+  if (noAtual->keys[ind] == procurando && noAtual->folha) {
+    indice = ind;
+    return noAtual;
+  }
   if (!noAtual->folha) return achaElemento(noAtual->filhos[ind], indice, procurando);
   return NULL;
 }
@@ -367,10 +371,6 @@ int addArquivo(FILE *arquivo){
   return i;
 }
 
-void insere(nodo_t* &arvore, nodo_t *noAtual){
-
-}
-
 char *criaArquivo(char *texto){
   char *nomeArquivo;
   FILE *arq;
@@ -393,9 +393,64 @@ void insereLinha(nodo_t* &arvore, char *linha){
   insereArquivo(arvore, criaArquivo(linha));
 }
 
+nodo_t *achaElementoInsercao(nodo_t* noAtual, int &indice, Hash procurando) {
+  int ind = bbin(noAtual, procurando);
+  if (noAtual->keys[ind] == procurando && noAtual->folha) {
+    indice = ind;
+    return noAtual;
+  }
+  if (!noAtual->folha) return achaElementoInsercao(noAtual->filhos[ind], indice, procurando);
+  return noAtual;
+}
+
+void insere(nodo_t* &arvore, index_t info, int indexArquivo){
+  nodo_t *noAtual, *noNovo = NULL;
+  int indice = 0;
+  offsets_t *novo = NULL;
+
+  printf("\n Deu certo");
+  printf("info ao criar offset %lld", info.offset);
+  printf("info ao criar hash %lld \n", info.hash);
+  noAtual = achaElementoInsercao(arvore, indice, info.hash);
+  //if (indice == -1) indice = 0;
+
+  if (noAtual->keys[indice] != info.hash){
+    if (noAtual->quantidadeKeys >= (_ordem-1)){
+      //Criar nodo com informação
+      noNovo = criaNodo(_ordem, true);
+      noNovo->keys[noNovo->quantidadeKeys] = info.hash;
+      noNovo->quantidadeKeys++;
+    }else{
+      noAtual->keys[noAtual->quantidadeKeys] = info.hash;
+      noAtual->quantidadeKeys++;
+    }
+  }
+
+  //cria novo offset, passando como parametro o offset da hash atual e ligando o novo offset no começo da lista
+  novo = NULL;
+  if (noNovo != NULL) {
+    novo = criaOffset(info.offset, noNovo->offsets[noNovo->quantidadeKeys-1], indexArquivo);
+    //if (!novo) { printf("Erro ao criar offset %lld", info.offset); return; }
+    noNovo->offsets[indice] = novo;
+
+  }else{
+    //novo = criaOffset(info.offset, noAtual->offsets[noAtual->quantidadeKeys-1], indexArquivo);
+    novo = criaOffset(info.offset, noAtual->offsets[noAtual->quantidadeKeys-1], indexArquivo);
+    if (!novo) { printf("Erro ao criar offset %lld", info.offset); return; }
+    noAtual->offsets[indice] = novo;
+    //checaPai(noAtual, &noAtual->pai, info.hash, _ordem);
+  }
+  //noAtual->offsets[indice] = novo;
+  //até esta parte funciona mas quando o irmao tem 5 e for adicionar mais precisa nao fazer o trata excessoes mas
+  if (noNovo != NULL)  {
+    checaPai(noNovo, &noAtual->pai, noNovo->keys[0], _ordem);
+    //noNovo = trataExcecoes(noAtual->pai, noNovo, _ordem); //Sem isso funciona mas o ultimo sobra um, então ver o que fazer
+  }
+}
+
 void insereArquivo(nodo_t* &arvore, char *nomeDoArquivo){
   vind indices;
-  int indiceArquivo = addArquivo(abrirArquivo(nomeDoArquivo));
+  int indiceArquivo = addArquivo(abrirArquivo(nomeDoArquivo)), i;
 
   if (indiceArquivo == -1) return;
 
@@ -404,11 +459,14 @@ void insereArquivo(nodo_t* &arvore, char *nomeDoArquivo){
 
   if (arvore == NULL){
     //realiza o bulkload que retornara 0 no sucesso
-    if (bulk_loading(arvore, indices, _ordem)) return;
+    if (bulk_loading(arvore, indices, _ordem, indiceArquivo)) return;
   }else{
     //Chamar função insere para cada item;
+    for (i = 0; i < indices.size(); i++){
+      insere(arvore, indices[i], indiceArquivo);
+    }
   }
-  for (int i = 0; i < (int)indices.size(); i++)
+  for (i = 0; i < (int)indices.size(); i++)
     printf("%d: %llu\n", i, indices[i].hash);
 }
 
