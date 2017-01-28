@@ -167,7 +167,7 @@ int checaPai(nodo_t *filhoAtual, nodo_t** pAtual, Hash hashQueVem, int ordem) { 
     tioAtual->filhos[j] = paiAtual->filhos[i];
     tioAtual->filhos[j]->pai = tioAtual;
     //coloca novos numeros
-    tioAtual->quantidadeKeys = ordem / 2 - 1;
+    tioAtual->quantidadeKeys = (ordem/2) - 1;
     tioAtual->quantidadeFilhos = tioAtual->quantidadeKeys + 1;
     paiAtual->quantidadeKeys = (ordem-1)/2;
     paiAtual->quantidadeFilhos = (ordem+1)/2;
@@ -404,48 +404,53 @@ nodo_t *achaElementoInsercao(nodo_t* noAtual, int &indice, Hash procurando) {
 }
 
 void insere(nodo_t* &arvore, index_t info, int indexArquivo){
-  nodo_t *noAtual, *noNovo = NULL;
-  int indice = 0;
+  nodo_t *noAtual, *noNovo, *irmaoAtual, *paiAtual = NULL;
+  int indice, i, j = 0;
   offsets_t *novo = NULL;
+  Hash hashQueSobe;
 
   printf("\n Deu certo");
   printf("info ao criar offset %lld", info.offset);
   printf("info ao criar hash %lld \n", info.hash);
   noAtual = achaElementoInsercao(arvore, indice, info.hash);
-  //if (indice == -1) indice = 0;
 
   if (noAtual->keys[indice] != info.hash){
-    if (noAtual->quantidadeKeys >= (_ordem-1)){
-      //Criar nodo com informação
-      noNovo = criaNodo(_ordem, true);
-      noNovo->keys[noNovo->quantidadeKeys] = info.hash;
-      noNovo->quantidadeKeys++;
-    }else{
-      noAtual->keys[noAtual->quantidadeKeys] = info.hash;
-      noAtual->quantidadeKeys++;
+    noAtual->keys[noAtual->quantidadeKeys] = info.hash;
+    noAtual->quantidadeKeys++;
+  }
+
+  novo = criaOffset(info.offset, noAtual->offsets[noAtual->quantidadeKeys-1], indexArquivo);
+  if (!novo) { printf("Erro ao criar offset %lld", info.offset); return; }
+  noAtual->offsets[indice] = novo;
+
+  if (noAtual->quantidadeKeys >= _ordem) {
+    irmaoAtual = criaNodo(_ordem, false);
+    if (!irmaoAtual) return; //retorna erro se nao criou
+
+    //pega hash que sobe
+    hashQueSobe = noAtual->keys[(_ordem-1)/2];
+
+    //divide noAtual com irmaoAtual
+    for (i = (_ordem + 1) / 2, j = 0; i < _ordem - 1; i++, j++) {
+      irmaoAtual->keys[j] = noAtual->keys[i];
     }
+
+    irmaoAtual->quantidadeKeys = (_ordem/2) - 1;
+    irmaoAtual->quantidadeFilhos = 0;
+
+    noAtual->quantidadeKeys = (_ordem-1)/2;
+    noAtual->quantidadeFilhos = 0;
+
+    paiAtual = noAtual->pai;
+    irmaoAtual->pai = paiAtual;
+    paiAtual->quantidadeFilhos++;
+    paiAtual->filhos[paiAtual->quantidadeFilhos] = irmaoAtual;
   }
 
-  //cria novo offset, passando como parametro o offset da hash atual e ligando o novo offset no começo da lista
-  novo = NULL;
-  if (noNovo != NULL) {
-    novo = criaOffset(info.offset, noNovo->offsets[noNovo->quantidadeKeys-1], indexArquivo);
-    //if (!novo) { printf("Erro ao criar offset %lld", info.offset); return; }
-    noNovo->offsets[indice] = novo;
-
-  }else{
-    //novo = criaOffset(info.offset, noAtual->offsets[noAtual->quantidadeKeys-1], indexArquivo);
-    novo = criaOffset(info.offset, noAtual->offsets[noAtual->quantidadeKeys-1], indexArquivo);
-    if (!novo) { printf("Erro ao criar offset %lld", info.offset); return; }
-    noAtual->offsets[indice] = novo;
-    //checaPai(noAtual, &noAtual->pai, info.hash, _ordem);
+  if (noAtual->pai->quantidadeFilhos > _ordem)  {
+      checaPai(irmaoAtual, &paiAtual, hashQueSobe, _ordem);
   }
-  //noAtual->offsets[indice] = novo;
-  //até esta parte funciona mas quando o irmao tem 5 e for adicionar mais precisa nao fazer o trata excessoes mas
-  if (noNovo != NULL)  {
-    checaPai(noNovo, &noAtual->pai, noNovo->keys[0], _ordem);
-    //noNovo = trataExcecoes(noAtual->pai, noNovo, _ordem); //Sem isso funciona mas o ultimo sobra um, então ver o que fazer
-  }
+  noAtual = irmaoAtual;
 }
 
 void insereArquivo(nodo_t* &arvore, char *nomeDoArquivo){
@@ -463,6 +468,7 @@ void insereArquivo(nodo_t* &arvore, char *nomeDoArquivo){
   }else{
     //Chamar função insere para cada item;
     for (i = 0; i < indices.size(); i++){
+      printf("\nIndice de insercao:%d",i);
       insere(arvore, indices[i], indiceArquivo);
     }
   }
