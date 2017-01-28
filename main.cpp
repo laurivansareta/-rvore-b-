@@ -11,13 +11,14 @@ int main(int argc, char *argv[]) {
   atributo = atoi(argv[1]);
   nChar = atoi(argv[2]);
   ordem = atoi(argv[3]);
-  strcpy(nomeArquivo,argv[4]);
-
   setAtributos(nChar, atributo, ordem);
 
-  if(strlen(nomeArquivo) > 0) {
+  if (argv[4]){
+    strcpy(nomeArquivo,argv[4]);
     //Carrega e insere o arquivo informado inicialmente;
-    insereArquivo(arvore, nomeArquivo);
+    if(strlen(nomeArquivo) > 0) {
+      insereArquivo(arvore, nomeArquivo);
+    }
   }
 
   while (opMenu) {

@@ -415,6 +415,7 @@ void insere(nodo_t* &arvore, index_t info, int indexArquivo){
   noAtual = achaElementoInsercao(arvore, indice, info.hash);
 
   if (noAtual->keys[indice] != info.hash){
+      //ESTA SEMPRE INSERINDO NA ULTIMA A DIREITA PRECISA VER A POSIÇÃO CORRETA E CORRIGIR.
     noAtual->keys[noAtual->quantidadeKeys] = info.hash;
     noAtual->quantidadeKeys++;
   }
@@ -447,7 +448,7 @@ void insere(nodo_t* &arvore, index_t info, int indexArquivo){
     paiAtual->filhos[paiAtual->quantidadeFilhos] = irmaoAtual;
   }
 
-  if (noAtual->pai->quantidadeFilhos > _ordem)  {
+  if (noAtual->pai && (noAtual->pai->quantidadeFilhos > _ordem)) {
       checaPai(irmaoAtual, &paiAtual, hashQueSobe, _ordem);
   }
   noAtual = irmaoAtual;
