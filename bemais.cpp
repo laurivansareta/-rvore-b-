@@ -476,7 +476,10 @@ void insere(nodo_t* &arvore, index_t info, int indexArquivo){
 
   if (noAtual->pai && (noAtual->pai->quantidadeFilhos > _ordem)) {
       checaPai(irmaoAtual, &paiAtual, paiAtual->keys[(_ordem-1)/2], _ordem);
-      arvore = paiAtual->pai;
+      //atualiza a raiz
+      noNovo = irmaoAtual->pai;
+      while (noNovo->pai != NULL) noNovo = noNovo->pai;
+      arvore = noNovo;
   }
 }
 
