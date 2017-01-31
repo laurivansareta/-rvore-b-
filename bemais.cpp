@@ -159,15 +159,13 @@ int checaPai(nodo_t *filhoAtual, nodo_t** pAtual, Hash hashQueVem, int ordem) { 
     hashQueSobe = paiAtual->keys[(ordem-1)/2];
 
     //divide paiAtual com tioAtual
-    for (i = (ordem + 1) / 2, j = 0; i < ordem - 1; i++, j++) {
+    for (i = (ordem + 1) / 2, j = 0; i < ordem; i++, j++) {
       tioAtual->keys[j] = paiAtual->keys[i];
       tioAtual->filhos[j] = paiAtual->filhos[i];
       tioAtual->filhos[j]->pai = tioAtual;
     }
-    tioAtual->filhos[j] = paiAtual->filhos[i];
-    tioAtual->filhos[j]->pai = tioAtual;
     //coloca novos numeros
-    tioAtual->quantidadeKeys = (ordem/2) - 1;
+    tioAtual->quantidadeKeys = (ordem-1)/2;
     tioAtual->quantidadeFilhos = tioAtual->quantidadeKeys + 1;
     paiAtual->quantidadeKeys = (ordem-1)/2;
     paiAtual->quantidadeFilhos = (ordem+1)/2;
@@ -478,6 +476,7 @@ void insere(nodo_t* &arvore, index_t info, int indexArquivo){
 
   if (noAtual->pai && (noAtual->pai->quantidadeFilhos > _ordem)) {
       checaPai(irmaoAtual, &paiAtual, paiAtual->keys[(_ordem-1)/2], _ordem);
+      arvore = paiAtual->pai;
   }
 }
 
