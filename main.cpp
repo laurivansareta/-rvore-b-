@@ -32,6 +32,16 @@ int main(int argc, char *argv[]) {
       imprimeArvore(arvore);
       break;
     case 2:
+        printf("Digite o texto a ser Inserido\n");
+        fgets(insercao, MAXLINHA, stdin);
+        insercao[strlen(insercao)-1] = '\0';
+        insercao[MAXLINHA] = '\0';
+        insereLinha(arvore, insercao);
+      break;
+    case 3:
+      //Remoção;
+      break;
+    case 4:
       printf("Digite o texto a ser buscado\n");
       fgets(busca, MAXLINHA, stdin);
       busca[strlen(busca)-1] = '\0';
@@ -46,19 +56,12 @@ int main(int argc, char *argv[]) {
         putchar('\n');
       }
       break;
-    case 3:
+    case 5:
         printf("Digite nome do arquivo a ser inserido.\n");
         fgets(insercao, MAXLINHA, stdin);
         insercao[strlen(insercao)-1] = '\0';
         insercao[MAXLINHA] = '\0';
         insereArquivo(arvore, insercao);
-        break;
-    case 4:
-        printf("Digite o texto a ser Inserido\n");
-        fgets(insercao, MAXLINHA, stdin);
-        insercao[strlen(insercao)-1] = '\0';
-        insercao[MAXLINHA] = '\0';
-        insereLinha(arvore, insercao);
         break;
     default:
       printf("Opção inválida\n");
