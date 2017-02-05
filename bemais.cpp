@@ -159,13 +159,15 @@ int checaPai(nodo_t *filhoAtual, nodo_t** pAtual, Hash hashQueVem, int ordem) { 
     hashQueSobe = paiAtual->keys[(ordem-1)/2];
 
     //divide paiAtual com tioAtual
-    for (i = (ordem + 1) / 2, j = 0; i < ordem; i++, j++) {
+    for (i = (ordem + 1) / 2, j = 0; i < ordem - 1; i++, j++) {
       tioAtual->keys[j] = paiAtual->keys[i];
       tioAtual->filhos[j] = paiAtual->filhos[i];
       tioAtual->filhos[j]->pai = tioAtual;
     }
+    tioAtual->filhos[j] = paiAtual->filhos[i];
+    tioAtual->filhos[j]->pai = tioAtual;
     //coloca novos numeros
-    tioAtual->quantidadeKeys = (ordem-1)/2;
+    tioAtual->quantidadeKeys = ordem / 2 - 1;
     tioAtual->quantidadeFilhos = tioAtual->quantidadeKeys + 1;
     paiAtual->quantidadeKeys = (ordem-1)/2;
     paiAtual->quantidadeFilhos = (ordem+1)/2;
@@ -394,8 +396,9 @@ void insereLinha(nodo_t* &arvore, char *linha){
 nodo_t *achaElementoInsercao(nodo_t* noAtual, int &indice, Hash procurando) {
   int ind = bbin(noAtual, procurando);
   //Ajustado para buscar o o índice correto para ser inserido caso não encontre um igual.
-  indice = ind;
+
   if (noAtual->keys[ind] == procurando && noAtual->folha) {
+    indice = ind;
     return noAtual;
   }
   if (!noAtual->folha) return achaElementoInsercao(noAtual->filhos[ind], indice, procurando);
@@ -420,7 +423,7 @@ void insere(nodo_t* &arvore, index_t info, int indexArquivo){
         offsetTemp = noAtual->offsets[i];
         noAtual->keys[i] = info.hash;
 
-        novo = criaOffset(info.offset, noAtual->offsets[i], indexArquivo);
+        novo = criaOffset(info.offset, NULL, indexArquivo);
         if (!novo) { printf("Erro ao criar offset %lld", info.offset); return; }
         noAtual->offsets[i] = novo;
 
@@ -439,14 +442,14 @@ void insere(nodo_t* &arvore, index_t info, int indexArquivo){
       }
     }
     if (keyTemp == 0){
-      noAtual->keys[noAtual->quantidadeKeys] = info.hash;
-      novo = criaOffset(info.offset, noAtual->offsets[noAtual->quantidadeKeys], indexArquivo);
+      noAtual->keys[indice] = info.hash;
+      novo = criaOffset(info.offset, NULL, indexArquivo);
       if (!novo) { printf("Erro ao criar offset %lld", info.offset); return; }
-      noAtual->offsets[noAtual->quantidadeKeys] = novo;
+      noAtual->offsets[indice] = novo;
       noAtual->quantidadeKeys++;
     }
   }else{
-    novo = criaOffset(info.offset, noAtual->offsets[noAtual->quantidadeKeys-1], indexArquivo);
+    novo = criaOffset(info.offset, noAtual->offsets[indice], indexArquivo);
     if (!novo) { printf("Erro ao criar offset %lld", info.offset); return; }
     noAtual->offsets[indice] = novo;
   }
@@ -460,6 +463,7 @@ void insere(nodo_t* &arvore, index_t info, int indexArquivo){
     //divide noAtual com irmaoAtual
     for (i = (_ordem-1)/2, j = 0; i <= _ordem - 1; i++, j++) {
       irmaoAtual->keys[j] = noAtual->keys[i];
+      irmaoAtual->offsets[j] = noAtual->offsets[i];
     }
 
     irmaoAtual->quantidadeKeys = (_ordem+1)/2;
