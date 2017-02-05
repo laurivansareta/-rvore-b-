@@ -344,9 +344,11 @@ nodo_t *achaElemento(nodo_t* noAtual, int &indice, Hash procurando) {
 void imprimeTupla(nodo_t *nodoAtual, int indiceElemento) {
   offsets_t *o;
   char tupla[MAXLINHA];
-  FILE *arquivo = _arquivos[nodoAtual->offsets[indiceElemento]->indexArquivo];
-  if (!nodoAtual || !arquivo || indiceElemento < 0) return;
+  FILE *arquivo = NULL;
+  if (!nodoAtual || indiceElemento < 0) return;
   for (o = nodoAtual->offsets[indiceElemento]; o; o = o->prox) {
+    arquivo = _arquivos[o->indexArquivo];
+    if (!arquivo) continue;
     fseek(arquivo, o->offset, SEEK_SET);
     fgets(tupla, MAXLINHA, arquivo);
     if (tupla[strlen(tupla)-1] == '\n') tupla[strlen(tupla)-1] = '\0';
