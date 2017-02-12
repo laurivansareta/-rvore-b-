@@ -392,6 +392,7 @@ char *criaArquivo(char *texto){
 }
 
 void insereLinha(nodo_t* &arvore, char *linha){
+  if (strlen(linha) == 0) return;
   insereArquivo(arvore, criaArquivo(linha));
 }
 
@@ -416,10 +417,12 @@ void insere(nodo_t* &arvore, index_t info, int indexArquivo){
   printf("\n Deu certo");
   printf("info ao criar offset %lld", info.offset);
   printf("info ao criar hash %lld \n", info.hash);
+  //Busca o nodo folha que o valor será inserido.
   noAtual = achaElementoInsercao(arvore, indice, info.hash);
 
   if (noAtual->keys[indice] != info.hash){
     for (i=indice; i<noAtual->quantidadeKeys; i++){
+      //procura a posição para inserir.
       if ((noAtual->keys[i] > info.hash) || (i==(noAtual->quantidadeKeys-1))){
         keyTemp = noAtual->keys[i];
         offsetTemp = noAtual->offsets[i];
@@ -428,7 +431,7 @@ void insere(nodo_t* &arvore, index_t info, int indexArquivo){
         novo = criaOffset(info.offset, NULL, indexArquivo);
         if (!novo) { printf("Erro ao criar offset %lld", info.offset); return; }
         noAtual->offsets[i] = novo;
-
+        //Se necessário move para direita os nodos quando for inserido no meio da folha.
         for (i++; i<=noAtual->quantidadeKeys;i++){
           keyTemp2 = noAtual->keys[i];
           offsetTemp2 = noAtual->offsets[i];
@@ -443,6 +446,7 @@ void insere(nodo_t* &arvore, index_t info, int indexArquivo){
         noAtual->quantidadeKeys++;
       }
     }
+    //Quando  inserido na ultima posição sem necessidade de realocar
     if (keyTemp == 0){
       noAtual->keys[indice] = info.hash;
       novo = criaOffset(info.offset, NULL, indexArquivo);
@@ -451,11 +455,13 @@ void insere(nodo_t* &arvore, index_t info, int indexArquivo){
       noAtual->quantidadeKeys++;
     }
   }else{
+    //Se já tem um valor somente vai incluir um offset.
     novo = criaOffset(info.offset, noAtual->offsets[indice], indexArquivo);
     if (!novo) { printf("Erro ao criar offset %lld", info.offset); return; }
     noAtual->offsets[indice] = novo;
   }
 
+  //Faz split.
   if (noAtual->quantidadeKeys >= _ordem) {
     irmaoAtual = criaNodo(_ordem, true);
     if (!irmaoAtual) return;
@@ -474,6 +480,13 @@ void insere(nodo_t* &arvore, index_t info, int indexArquivo){
     noAtual->quantidadeKeys = (_ordem-1)/2;
     noAtual->quantidadeFilhos = 0;
 
+    if (!noAtual->pai) {
+      paiAtual = criaNodo(_ordem, false);
+      noAtual->pai = paiAtual;
+      paiAtual->filhos[0] = noAtual;
+      paiAtual->quantidadeFilhos = 1;
+    }
+
     paiAtual = noAtual->pai;
     irmaoAtual->pai = paiAtual;
     paiAtual->filhos[paiAtual->quantidadeFilhos++] = irmaoAtual;
@@ -482,11 +495,16 @@ void insere(nodo_t* &arvore, index_t info, int indexArquivo){
 
   if (noAtual->pai && (noAtual->pai->quantidadeFilhos > _ordem)) {
       checaPai(irmaoAtual, &paiAtual, paiAtual->keys[(_ordem-1)/2], _ordem);
-      //atualiza a raiz
-      noNovo = irmaoAtual->pai;
-      while (noNovo->pai != NULL) noNovo = noNovo->pai;
-      arvore = noNovo;
   }
+  //atualiza a raiz
+  if (noAtual->pai){
+    noNovo = noAtual->pai;
+    while (noNovo->pai != NULL){
+        noNovo = noNovo->pai;
+    }
+    arvore = noNovo;
+  }
+
 }
 
 void insereArquivo(nodo_t* &arvore, char *nomeDoArquivo){
