@@ -5,11 +5,7 @@
 #include <algorithm>
 
 #define MAXLINHA 1123
-<<<<<<< HEAD
-#define MAXARQUIVOS 2000
-=======
 #define MAXARQUIVOS 123456789
->>>>>>> d73880b41455154fc42221f1024fe018d12c1e1f
 
 using namespace std;
 
