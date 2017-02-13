@@ -52,9 +52,11 @@ void leituraArquivo(vind &indices, FILE *entrada){
 
 FILE* abrirArquivo(char arquivoEntrada[]){
   FILE *entrada;
-  entrada = fopen(arquivoEntrada, "a+"); //abre o arquivo de entrada que vai ser passado de parametro quando executar o programa
+  //abre o arquivo de entrada que vai ser passado de parametro quando executar o programa.
+  entrada = fopen(arquivoEntrada, "a+");
   if (!entrada) { printf("Não abriu entrada\n"); return NULL; }
-  fseek(entrada, 0, SEEK_SET); //retorna o buffer pro começo (so pra garantir)
+  //retorna o buffer para o começo.
+  fseek(entrada, 0, SEEK_SET);
   return entrada;
 }
 
@@ -424,14 +426,16 @@ void insere(nodo_t* &arvore, index_t info, int indexArquivo){
     for (i=indice; i<noAtual->quantidadeKeys; i++){
       //procura a posição para inserir.
       if ((noAtual->keys[i] > info.hash) || (i==(noAtual->quantidadeKeys-1))){
+        //Armazena temporáriamente para deslocar a informação,
         keyTemp = noAtual->keys[i];
         offsetTemp = noAtual->offsets[i];
-        noAtual->keys[i] = info.hash;
-
+        //Cria o offset para a informação;
         novo = criaOffset(info.offset, NULL, indexArquivo);
         if (!novo) { printf("Erro ao criar offset %lld", info.offset); return; }
+        //Armazena na informação na posição correta.
+        noAtual->keys[i] = info.hash;
         noAtual->offsets[i] = novo;
-        //Se necessário move para direita os nodos quando for inserido no meio da folha.
+        //Move para direita os nodos quando a informação for inserido no meio da folha.
         for (i++; i<=noAtual->quantidadeKeys;i++){
           keyTemp2 = noAtual->keys[i];
           offsetTemp2 = noAtual->offsets[i];
@@ -509,6 +513,7 @@ void insere(nodo_t* &arvore, index_t info, int indexArquivo){
 
 void insereArquivo(nodo_t* &arvore, char *nomeDoArquivo){
   vind indices;
+  //Abre e adiciona arquivo na lista para utilizar posteriormente.
   int indiceArquivo = addArquivo(abrirArquivo(nomeDoArquivo)), i;
 
   if (indiceArquivo == -1) return;
@@ -520,7 +525,7 @@ void insereArquivo(nodo_t* &arvore, char *nomeDoArquivo){
     //realiza o bulkload que retornara 0 no sucesso
     if (bulk_loading(arvore, indices, _ordem, indiceArquivo)) return;
   }else{
-    //Chamar função insere para cada item;
+    //Chama função insere para cada item;
     for (i = 0; i < indices.size(); i++){
       printf("\nIndice de insercao:%d",i);
       insere(arvore, indices[i], indiceArquivo);

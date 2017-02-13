@@ -49,6 +49,7 @@ int main(int argc, char *argv[]) {
       //      system("clear\n");
       printf("Você buscou: %s\n", busca);
       nodoDeBusca = achaElemento(arvore, indiceBusca, hashFunction(busca));
+      printf("Erro ao criar offset %lld", hashFunction(busca)); //1047
       if (!nodoDeBusca) printf("Linha não encontrada\n");
       else {
         printf("\nResultados encontrados:\n");
