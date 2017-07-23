@@ -45,7 +45,6 @@ void leituraArquivo(vind &indices, FILE *entrada){
     //empurra no vetor
     indices.push_back(index_t(hash, offsetAux));
   }
-
   //ordena de acordo com as hashs
   sort(indices.begin(), indices.end(), compareIndex);
 }
@@ -89,12 +88,12 @@ nodo_t* trataExcecoes(nodo_t* paiAtual, nodo_t *filhoAtual, int ordem) {
       familiarBeneficiario->offsets[i] = filhoAtual->offsets[j];
       familiarBeneficiario->quantidadeKeys++;
     }
-    filhoAtual->quantidadeKeys = 0; //coloca 0 se nao o mataArvore vai apagar todos os offsets que agora estao no familiarBeneficiario
-    //paiAtual->quantidadeFilhos--;
-    //paiAtual->quantidadeKeys--;
+    //coloca 0 se nao o mataArvore vai apagar todos os offsets que agora estao no familiarBeneficiario
+    filhoAtual->quantidadeKeys = 0;
     mataArvore(filhoAtual);
     filhoAtual = familiarBeneficiario;
-    removeUltimo(paiAtual, ordem); //remove um de todos os ancestrais do antigo filhoAtual
+    //remove um de todos os ancestrais do antigo filhoAtual
+    removeUltimo(paiAtual, ordem);
   }
   return filhoAtual;
 }
@@ -416,9 +415,6 @@ void insere(nodo_t* &arvore, index_t info, int indexArquivo){
   offsets_t *novo, *offsetTemp, *offsetTemp2 = NULL;
   Hash hashQueSobe=0, keyTemp=0, keyTemp2=0;
 
-  printf("\n Deu certo");
-  printf("info ao criar offset %lld", info.offset);
-  printf("info ao criar hash %lld \n", info.hash);
   //Busca o nodo folha que o valor será inserido.
   noAtual = achaElementoInsercao(arvore, indice, info.hash);
 
@@ -508,7 +504,6 @@ void insere(nodo_t* &arvore, index_t info, int indexArquivo){
     }
     arvore = noNovo;
   }
-
 }
 
 void insereArquivo(nodo_t* &arvore, char *nomeDoArquivo){
@@ -527,7 +522,6 @@ void insereArquivo(nodo_t* &arvore, char *nomeDoArquivo){
   }else{
     //Chama função insere para cada item;
     for (i = 0; i < indices.size(); i++){
-      printf("\nIndice de insercao:%d",i);
       insere(arvore, indices[i], indiceArquivo);
     }
   }
